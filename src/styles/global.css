@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+/* =====================================================================
+   三国志NET デザインシステム
+   2020年代以降のトレンド（OKLCH広色域、ウォームニュートラル、
+   ダークモード基調＋ヴィヴィッドなアクセント、ガラスモーフィズム、
+   ソフトな大きめの角丸・シャドウ）を、三国志の世界観（朱・金・翡翠・墨）
+   に落とし込んだ配色。
+   ===================================================================== */
+
+/* .dark クラスが付いた要素配下でダーク値を使う（手動トグル用） */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic UI", "Noto Sans JP", system-ui, sans-serif;
+  --font-display: "Inter", "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP",
+    system-ui, sans-serif;
+
+  /* 朱(crimson) — 主アクセント。攻撃/警告/王朝の色 */
+  --color-crimson-50: oklch(0.97 0.02 25);
+  --color-crimson-200: oklch(0.88 0.07 25);
+  --color-crimson-400: oklch(0.68 0.17 25);
+  --color-crimson-500: oklch(0.58 0.19 25);
+  --color-crimson-600: oklch(0.50 0.19 24);
+  --color-crimson-700: oklch(0.42 0.17 23);
+
+  /* 金(gold) — 副アクセント。資源/実績/君主の色 */
+  --color-gold-200: oklch(0.90 0.08 85);
+  --color-gold-400: oklch(0.80 0.13 86);
+  --color-gold-500: oklch(0.74 0.15 85);
+  --color-gold-600: oklch(0.64 0.14 78);
+
+  /* 翡翠(jade) — 内政/成功/成長の色 */
+  --color-jade-300: oklch(0.82 0.10 160);
+  --color-jade-400: oklch(0.72 0.12 158);
+  --color-jade-500: oklch(0.63 0.13 155);
+  --color-jade-600: oklch(0.52 0.12 154);
+
+  /* 藍(azure) — 情報/水系/リンクの色 */
+  --color-azure-400: oklch(0.72 0.11 235);
+  --color-azure-500: oklch(0.62 0.13 238);
+  --color-azure-600: oklch(0.52 0.13 240);
+
+  /* 墨(ink) — ニュートラル。ウォームグレー（純グレーではなく僅かに暖色寄り） */
+  --color-ink-50: oklch(0.985 0.004 75);
+  --color-ink-100: oklch(0.96 0.006 75);
+  --color-ink-200: oklch(0.90 0.008 70);
+  --color-ink-300: oklch(0.80 0.010 65);
+  --color-ink-400: oklch(0.64 0.012 60);
+  --color-ink-500: oklch(0.50 0.014 55);
+  --color-ink-600: oklch(0.38 0.014 50);
+  --color-ink-700: oklch(0.28 0.014 48);
+  --color-ink-800: oklch(0.21 0.014 45);
+  --color-ink-900: oklch(0.16 0.012 42);
+  --color-ink-950: oklch(0.12 0.010 40);
+
+  /* セマンティックトークン（:root / .dark で値を切り替える） */
+  --color-bg: var(--ui-bg);
+  --color-bg-elevated: var(--ui-bg-elevated);
+  --color-surface: var(--ui-surface);
+  --color-surface-hover: var(--ui-surface-hover);
+  --color-border: var(--ui-border);
+  --color-text: var(--ui-text);
+  --color-text-muted: var(--ui-text-muted);
+  --color-text-faint: var(--ui-text-faint);
+  --color-accent: var(--ui-accent);
+  --color-accent-contrast: var(--ui-accent-contrast);
+
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -8px oklch(0 0 0 / 0.18);
+  --shadow-glow: 0 0 0 1px var(--ui-border), 0 12px 32px -12px oklch(0.58 0.19 25 / 0.35);
+}
+
+:root {
+  --ui-bg: oklch(0.975 0.006 80);
+  --ui-bg-elevated: oklch(0.99 0.004 80);
+  --ui-surface: oklch(1 0 0);
+  --ui-surface-hover: oklch(0.96 0.008 75);
+  --ui-border: oklch(0.88 0.01 70);
+  --ui-text: oklch(0.22 0.015 50);
+  --ui-text-muted: oklch(0.46 0.014 55);
+  --ui-text-faint: oklch(0.62 0.012 60);
+  --ui-accent: var(--color-crimson-500);
+  --ui-accent-contrast: oklch(0.99 0 0);
+  color-scheme: light;
+}
+
+.dark {
+  --ui-bg: var(--color-ink-950);
+  --ui-bg-elevated: var(--color-ink-900);
+  --ui-surface: oklch(0.19 0.014 45);
+  --ui-surface-hover: oklch(0.24 0.015 45);
+  --ui-border: oklch(0.32 0.016 45 / 0.7);
+  --ui-text: oklch(0.95 0.008 80);
+  --ui-text-muted: oklch(0.72 0.012 70);
+  --ui-text-faint: oklch(0.52 0.012 60);
+  --ui-accent: var(--color-crimson-400);
+  --ui-accent-contrast: oklch(0.14 0 0);
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  body {
+    min-height: 100svh;
+    background-image:
+      radial-gradient(60rem 30rem at 100% -10%, oklch(0.58 0.19 25 / 0.10), transparent),
+      radial-gradient(50rem 26rem at -10% 10%, oklch(0.74 0.15 85 / 0.08), transparent);
+    background-attachment: fixed;
+    font-feature-settings: "tnum" 1, "cv11" 1;
+  }
+
+  ::selection {
+    background-color: oklch(0.58 0.19 25 / 0.30);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background-color: color-mix(in oklch, var(--color-surface) 72%, transparent);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid var(--color-border);
+  }
+
+  .stat-track {
+    background-color: color-mix(in oklch, var(--color-ink-500) 18%, transparent);
+  }
+}
