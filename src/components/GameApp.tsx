@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { fetchMyCharacter } from '../lib/game';
 import type { CharacterRow } from '../lib/database.types';
@@ -27,46 +27,75 @@ const TABS: { key: Tab; label: string }[] = [
  * 何かの処理中にタブを切り替えても状態が飛ばない）ようにしている。
  */
 export default function GameApp() {
-  const [loading, setLoading] = useState(true);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [session, setSession] = useState<boolean>(false);
   const [character, setCharacter] = useState<CharacterRow | null>(null);
+  // 「キャラクター無し」と「まだ判定できていない」を区別するためのフラグ。
+  // これが無いと、ログイン直後キャラクター取得が完了するまでの一瞬だけ
+  // character===null になり、既にキャラを作成済みのユーザーにも
+  // 一瞬だけ武将作成画面が表示されてしまう（実際に発生したバグ）。
+  const [characterChecked, setCharacterChecked] = useState(false);
   const [tab, setTab] = useState<Tab>('status');
   const [refreshKey, setRefreshKey] = useState(0);
+  const prevSessionRef = useRef(false);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
+  // セッションの追跡はrefreshKeyに依存させない。依存させてしまうと、
+  // ゲーム内の何気ない操作（コマンド予約・国法投稿等）のたびに
+  // onAuthStateChangeの購読が張り直され、そのたびに下のキャラクター
+  // 判定が絡んで無用な再判定が走ってしまう。
   useEffect(() => {
     let active = true;
 
-    async function init() {
-      const { data } = await supabase.auth.getSession();
+    function handle(hasSession: boolean) {
       if (!active) return;
-      setSession(!!data.session);
-      if (data.session) {
-        const char = await fetchMyCharacter().catch(() => null);
-        if (active) setCharacter(char);
-      }
-      if (active) setLoading(false);
-    }
-    init();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      setSession(!!newSession);
-      if (newSession) {
-        const char = await fetchMyCharacter().catch(() => null);
-        setCharacter(char);
-      } else {
+      const wasSession = prevSessionRef.current;
+      prevSessionRef.current = hasSession;
+      setSession(hasSession);
+      if (hasSession && !wasSession) {
+        // 新規ログイン（false→true）。setSessionと同じ関数内・同じ
+        // レンダーバッチでcharacterCheckedをfalseに戻すことで、
+        // 「session=true かつ characterChecked=true（古い値）」という
+        // 中間状態が一瞬たりとも画面に出ないようにしている。
+        setCharacterChecked(false);
+      } else if (!hasSession) {
         setCharacter(null);
+        setCharacterChecked(true);
       }
+      setSessionLoading(false);
+    }
+
+    supabase.auth.getSession().then(({ data }) => handle(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      handle(!!newSession);
     });
 
     return () => {
       active = false;
       sub.subscription.unsubscribe();
     };
-  }, [refreshKey]);
+  }, []);
 
-  if (loading) {
+  // セッションが確定した後にキャラクターを取得する。refreshKeyの変化でも
+  // 再取得するが、characterCheckedは既にtrueのままなのでローディング
+  // 画面へは戻らず、character の中身だけが静かに更新される。
+  useEffect(() => {
+    if (sessionLoading || !session) return;
+    let active = true;
+    fetchMyCharacter()
+      .catch(() => null)
+      .then((char) => {
+        if (!active) return;
+        setCharacter(char);
+        setCharacterChecked(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [session, sessionLoading, refreshKey]);
+
+  if (sessionLoading || !characterChecked) {
     return (
       <div className="flex min-h-[60svh] items-center justify-center text-(--color-text-faint)">
         読み込み中……
