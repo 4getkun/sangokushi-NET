@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchTowns, fetchCountries, fetchMyQueue, fetchMyLogs } from '../../lib/game';
+import { fetchTowns, fetchCountries, fetchMyQueue, fetchMyLogs, fetchTimeRemakeSeconds } from '../../lib/game';
 import type { CharacterRow, TownRow, CountryRow, CommandQueueRow, CharacterLogRow } from '../../lib/database.types';
 import { COMMAND_LABELS, SOL_TYPE, portraitUrl } from '../../lib/constants';
 import { Card, CardTitle } from '../ui/Card';
@@ -15,6 +15,7 @@ export default function StatusPanel({
   const [countries, setCountries] = useState<CountryRow[]>([]);
   const [queue, setQueue] = useState<CommandQueueRow[]>([]);
   const [logs, setLogs] = useState<CharacterLogRow[]>([]);
+  const [timeRemakeSec, setTimeRemakeSec] = useState(3600);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,19 +25,31 @@ export default function StatusPanel({
       fetchCountries(),
       fetchMyQueue(character.id),
       fetchMyLogs(character.id, 30),
+      fetchTimeRemakeSeconds(),
     ])
-      .then(([t, c, q, l]) => {
+      .then(([t, c, q, l, sec]) => {
         if (!active) return;
         setTowns(t);
         setCountries(c);
         setQueue(q);
         setLogs(l);
+        setTimeRemakeSec(sec);
       })
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
   }, [character.id]);
+
+  // スロットi（+iターン先）が実際に実行される時刻。
+  // next_turn_due_atがスロット0の実行予定時刻そのものなので、
+  // そこから time_remake秒 ずつ足していくだけでよい
+  // （command_queueは1ターン処理ごとにスロットが1つずつ繰り上がるため）。
+  const dueAtBase = new Date(character.next_turn_due_at).getTime();
+  function slotTimeLabel(i: number): string {
+    const t = new Date(dueAtBase + i * timeRemakeSec * 1000);
+    return t.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+  }
 
   const town = towns.find((t) => t.id === character.position_town_id) ?? null;
   const country = countries.find((c) => c.id === character.country_id) ?? null;
@@ -116,7 +129,10 @@ export default function StatusPanel({
                   i === 0 ? 'bg-(--color-crimson-500)/10 font-medium' : '',
                 ].join(' ')}
               >
-                <span className="text-(--color-text-faint)">+{i}</span>
+                <span className="flex items-center gap-2 text-(--color-text-faint)">
+                  <span>+{i}</span>
+                  <span className="font-mono text-xs tabular-nums">{slotTimeLabel(i)}</span>
+                </span>
                 <span className={q && q.command_code !== 0 ? 'text-(--color-text)' : 'text-(--color-text-faint)'}>
                   {q ? (q.label || COMMAND_LABELS[q.command_code] || '不明') : '未定'}
                 </span>

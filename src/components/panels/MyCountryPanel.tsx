@@ -66,16 +66,26 @@ export default function MyCountryPanel({
 
   const isKing = character.id === country.king_character_id;
   const color = ELEMENT_COLORS[country.element % ELEMENT_COLORS.length];
+  const king = members.find((m) => m.id === country.king_character_id);
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_1fr]">
       <div className="flex flex-col gap-4">
         <Card glass>
           <div className="flex items-center gap-3">
-            <div
-              className="h-10 w-10 shrink-0 rounded-xl"
-              style={{ backgroundColor: color.bg, boxShadow: `0 0 0 2px ${color.ring}` }}
-            />
+            {king ? (
+              <img
+                src={portraitUrl(king.portrait)}
+                alt={`${king.display_name}（君主）の肖像`}
+                className="h-10 w-10 shrink-0 rounded-xl border-2 bg-(--color-bg-elevated) [image-rendering:pixelated]"
+                style={{ borderColor: color.ring }}
+              />
+            ) : (
+              <div
+                className="h-10 w-10 shrink-0 rounded-xl"
+                style={{ backgroundColor: color.bg, boxShadow: `0 0 0 2px ${color.ring}` }}
+              />
+            )}
             <div>
               <h2 className="text-xl font-bold text-(--color-text)">{country.name}</h2>
               <p className="text-sm text-(--color-text-muted)">
@@ -95,7 +105,7 @@ export default function MyCountryPanel({
         <Card glass>
           <CardTitle>役職</CardTitle>
           <ul className="flex flex-col gap-2 text-sm">
-            <OfficerRow label="君主" character={members.find((m) => m.id === country.king_character_id)} />
+            <OfficerRow label="君主" character={king} />
             {OFFICER_ROLES.map((role) => (
               <OfficerRow
                 key={role.code}

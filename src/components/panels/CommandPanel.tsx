@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
-  fetchTowns, fetchAdjacency, fetchItemCatalog, fetchMyQueue, reserveCommand,
+  fetchTowns, fetchAdjacency, fetchItemCatalog, fetchMyQueue, fetchTimeRemakeSeconds, reserveCommand,
 } from '../../lib/game';
 import type { CharacterRow, TownRow, ItemCatalogRow, CommandQueueRow } from '../../lib/database.types';
 import { COMMAND, COMMAND_LABELS, SOL_TYPE, SOL_PRICE } from '../../lib/constants';
@@ -34,6 +34,7 @@ export default function CommandPanel({
   const [adjacency, setAdjacency] = useState<Map<number, number[]>>(new Map());
   const [items, setItems] = useState<ItemCatalogRow[]>([]);
   const [queue, setQueue] = useState<CommandQueueRow[]>([]);
+  const [timeRemakeSec, setTimeRemakeSec] = useState(3600);
   const [loading, setLoading] = useState(true);
 
   const [command, setCommand] = useState<number>(COMMAND.NOUGYOU);
@@ -52,17 +53,27 @@ export default function CommandPanel({
 
   function load() {
     setLoading(true);
-    Promise.all([fetchTowns(), fetchAdjacency(), fetchItemCatalog(), fetchMyQueue(character.id)])
-      .then(([t, a, i, q]) => {
+    Promise.all([
+      fetchTowns(), fetchAdjacency(), fetchItemCatalog(), fetchMyQueue(character.id), fetchTimeRemakeSeconds(),
+    ])
+      .then(([t, a, i, q, sec]) => {
         setTowns(t);
         setAdjacency(a);
         setItems(i);
         setQueue(q);
+        setTimeRemakeSec(sec);
       })
       .finally(() => setLoading(false));
   }
 
   useEffect(load, [character.id]);
+
+  // 本陣タブと同じ考え方: スロットiの実行予定時刻 = next_turn_due_at + i * time_remake秒。
+  const dueAtBase = new Date(character.next_turn_due_at).getTime();
+  function slotTimeLabel(i: number): string {
+    const t = new Date(dueAtBase + i * timeRemakeSec * 1000);
+    return t.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+  }
 
   const emptySlots = useMemo(
     () => Array.from({ length: 24 }, (_, i) => i).filter((i) => {
@@ -283,9 +294,12 @@ export default function CommandPanel({
                     'flex flex-col items-center justify-center gap-0.5 rounded-lg p-1.5 text-center',
                     filled ? 'bg-(--color-jade-500)/12' : 'bg-(--color-surface-hover)',
                   ].join(' ')}
-                  title={q?.label || (q ? COMMAND_LABELS[q.command_code] : '未定')}
+                  title={`${slotTimeLabel(i)} ${q?.label || (q ? COMMAND_LABELS[q.command_code] : '未定')}`}
                 >
-                  <span className="font-mono text-(--color-text-faint)">+{i}</span>
+                  <span className="flex items-center gap-1 font-mono text-(--color-text-faint)">
+                    <span>+{i}</span>
+                    <span className="text-[0.65rem] tabular-nums">{slotTimeLabel(i)}</span>
+                  </span>
                   <span className="line-clamp-1 w-full text-(--color-text)">
                     {filled ? (COMMAND_LABELS[q!.command_code] ?? '？') : '―'}
                   </span>

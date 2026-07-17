@@ -92,6 +92,18 @@ export async function fetchItemCatalog(): Promise<ItemCatalogRow[]> {
   return data ?? [];
 }
 
+// 1ターン＝何秒か (TIME_REMAKE, game_config.time_remake)。
+// 行動予約欄で「このスロットは何時何分に実行されるか」を計算するために使う。
+let cachedTimeRemakeSeconds: number | null = null;
+export async function fetchTimeRemakeSeconds(): Promise<number> {
+  if (cachedTimeRemakeSeconds !== null) return cachedTimeRemakeSeconds;
+  const { data, error } = await supabase
+    .from('game_config').select('value').eq('key', 'time_remake').single();
+  if (error) throw error;
+  cachedTimeRemakeSeconds = data?.value ?? 3600;
+  return cachedTimeRemakeSeconds;
+}
+
 export async function fetchMapLog(channel: 'event' | 'chronicle', limit = 20): Promise<MapLogRow[]> {
   const { data, error } = await supabase
     .from('map_log').select('*').eq('channel', channel)
