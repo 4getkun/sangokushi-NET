@@ -5,7 +5,7 @@ import {
   postLocalRule, deleteLocalRule, setLoyalty, createUnit, joinUnit, leaveOrDisbandUnit,
 } from '../../lib/game';
 import type { CharacterRow, CountryRow, LocalRulePostRow, UnitRow } from '../../lib/database.types';
-import { OFFICER_ROLES, ELEMENT_COLORS } from '../../lib/constants';
+import { OFFICER_ROLES, ELEMENT_COLORS, portraitUrl } from '../../lib/constants';
 import { errorMessage } from '../../lib/errors';
 import { Card, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -146,7 +146,16 @@ function OfficerRow({ label, character }: { label: string; character?: Character
   return (
     <li className="flex items-center justify-between rounded-lg bg-(--color-surface-hover) px-3 py-2">
       <span className="text-(--color-text-faint)">{label}</span>
-      <span className="font-medium text-(--color-text)">{character ? character.display_name : '空席'}</span>
+      <span className="flex items-center gap-2 font-medium text-(--color-text)">
+        {character && (
+          <img
+            src={portraitUrl(character.portrait)}
+            alt={`${character.display_name}の肖像`}
+            className="h-6 w-6 shrink-0 rounded-md border border-(--color-border) bg-(--color-bg-elevated) [image-rendering:pixelated]"
+          />
+        )}
+        {character ? character.display_name : '空席'}
+      </span>
     </li>
   );
 }
@@ -159,12 +168,19 @@ function MembersCard({ members, king }: { members: CharacterRow[]; king: string 
         {[...members]
           .sort((a, b) => b.rank_points - a.rank_points)
           .map((m) => (
-            <li key={m.id} className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-(--color-surface-hover)">
-              <span className="text-(--color-text)">
-                {m.display_name}
-                {m.id === king && <span className="ml-1 text-(--color-gold-600)">★</span>}
+            <li key={m.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-(--color-surface-hover)">
+              <span className="flex min-w-0 items-center gap-2 text-(--color-text)">
+                <img
+                  src={portraitUrl(m.portrait)}
+                  alt={`${m.display_name}の肖像`}
+                  className="h-6 w-6 shrink-0 rounded-md border border-(--color-border) bg-(--color-bg-elevated) [image-rendering:pixelated]"
+                />
+                <span className="truncate">
+                  {m.display_name}
+                  {m.id === king && <span className="ml-1 text-(--color-gold-600)">★</span>}
+                </span>
               </span>
-              <span className="font-mono text-xs text-(--color-text-faint)">{m.rank_points.toLocaleString()} 点</span>
+              <span className="shrink-0 font-mono text-xs text-(--color-text-faint)">{m.rank_points.toLocaleString()} 点</span>
             </li>
           ))}
       </ul>
