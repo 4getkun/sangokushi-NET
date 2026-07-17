@@ -110,7 +110,7 @@ export default function StatusPanel({
         <div className="mt-6 flex flex-wrap gap-4 border-t border-(--color-border) pt-4 text-sm">
           <Stat label="功績" value={character.merit.toLocaleString()} />
           <Stat label="武勲点" value={character.rank_points.toLocaleString()} />
-          <Stat label="戦績" value={`${character.battle_wins.toLocaleString()} 勝`} />
+          <Stat label="戦績" value={character.battle_wins.toLocaleString()} suffix="勝" />
           <Stat label="未行動ターン" value={character.idle_turns.toString()} />
         </div>
       </Card>
@@ -165,11 +165,14 @@ export default function StatusPanel({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, suffix }: { label: string; value: string; suffix?: string }) {
   return (
     <div>
       <div className="text-xs text-(--color-text-faint)">{label}</div>
-      <div className="font-mono font-semibold text-(--color-text)">{value}</div>
+      <div className="font-mono font-semibold text-(--color-text)">
+        {value}
+        {suffix && <span className="ml-1 font-sans text-xs font-normal text-(--color-text-muted)">{suffix}</span>}
+      </div>
     </div>
   );
 }
