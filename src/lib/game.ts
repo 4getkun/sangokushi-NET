@@ -9,7 +9,18 @@ import type {
 // 認証
 // ---------------------------------------------------------------------
 export async function signUp(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  // emailRedirectToを明示しないと、確認メールのリンク先はSupabase側の
+  // 「Site URL」設定に丸投げになる。ダッシュボードの設定値がズレると
+  // （実際、一度ズレて404事故が起きた）気づきにくいため、ここで
+  // ブラウザの実行時情報から確実に正しいURL（GitHub Pagesのサブパス込み）
+  // を組み立てて明示的に渡す。Supabase側の「Redirect URLs」許可リストに
+  // https://4getkun.github.io/sangokushi-NET/** を登録済みなので検証も通る。
+  const emailRedirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo },
+  });
   if (error) throw error;
   return data;
 }
