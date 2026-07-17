@@ -6,6 +6,7 @@ import {
 } from '../../lib/game';
 import type { CharacterRow, CountryRow, LocalRulePostRow, UnitRow } from '../../lib/database.types';
 import { OFFICER_ROLES, ELEMENT_COLORS } from '../../lib/constants';
+import { errorMessage } from '../../lib/errors';
 import { Card, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/StatBar';
@@ -196,7 +197,7 @@ function KingControls({
       setNotice('国内布告を更新しました。');
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '更新に失敗しました。');
+      setError(errorMessage(err, '更新に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -210,7 +211,7 @@ function KingControls({
       setNotice('仕官時メッセージを更新しました。');
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '更新に失敗しました。');
+      setError(errorMessage(err, '更新に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -226,7 +227,7 @@ function KingControls({
       setAppointTarget('');
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '任命に失敗しました。');
+      setError(errorMessage(err, '任命に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -239,7 +240,7 @@ function KingControls({
       await kingDismiss(id);
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '解任に失敗しました。');
+      setError(errorMessage(err, '解任に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -325,7 +326,7 @@ function LocalRulesCard({ rules, onChanged }: { rules: LocalRulePostRow[]; onCha
       setBody('');
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '投稿に失敗しました。');
+      setError(errorMessage(err, '投稿に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -338,7 +339,7 @@ function LocalRulesCard({ rules, onChanged }: { rules: LocalRulePostRow[]; onCha
       await deleteLocalRule(id);
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '削除に失敗しました。');
+      setError(errorMessage(err, '削除に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -402,7 +403,7 @@ function UnitsCard({
       setMessage('');
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '部隊の結成に失敗しました。');
+      setError(errorMessage(err, '部隊の結成に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -415,7 +416,7 @@ function UnitsCard({
       await joinUnit(unitId);
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '参加に失敗しました。');
+      setError(errorMessage(err, '参加に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -428,7 +429,7 @@ function UnitsCard({
       await leaveOrDisbandUnit();
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '解散に失敗しました。');
+      setError(errorMessage(err, '解散に失敗しました。'));
     } finally {
       setBusy(false);
     }
@@ -485,7 +486,7 @@ function LoyaltyCard({ character, onChanged }: { character: CharacterRow; onChan
       await setLoyalty(value);
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '申告に失敗しました。');
+      setError(errorMessage(err, '申告に失敗しました。'));
     } finally {
       setBusy(false);
     }

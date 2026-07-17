@@ -4,6 +4,7 @@ import {
 } from '../../lib/game';
 import type { CharacterRow, TownRow, ItemCatalogRow, CommandQueueRow } from '../../lib/database.types';
 import { COMMAND, COMMAND_LABELS, SOL_TYPE, SOL_PRICE } from '../../lib/constants';
+import { errorMessage } from '../../lib/errors';
 import { Card, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 
@@ -118,7 +119,7 @@ export default function CommandPanel({
       load();
       onChanged();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '予約に失敗しました。');
+      setError(errorMessage(err, '予約に失敗しました。'));
     } finally {
       setBusy(false);
     }

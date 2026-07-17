@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { signIn, signUp } from '../../lib/game';
+import { errorMessage } from '../../lib/errors';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 
@@ -25,7 +26,7 @@ export default function AuthForm({ onAuthed }: { onAuthed: () => void }) {
         setNotice('確認メールを送信しました。メール内のリンクから認証を完了してください。');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '不明なエラーが発生しました。');
+      setError(errorMessage(err, '不明なエラーが発生しました。'));
     } finally {
       setBusy(false);
     }

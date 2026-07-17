@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 're
 import { createCharacter, fetchTowns, fetchCountries } from '../../lib/game';
 import type { TownRow, CountryRow } from '../../lib/database.types';
 import { ELEMENT_COLORS, PORTRAIT_COUNT, portraitUrl } from '../../lib/constants';
+import { errorMessage } from '../../lib/errors';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 
@@ -58,7 +59,7 @@ export default function CharacterCreateForm({ onCreated }: { onCreated: () => vo
       });
       onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '作成に失敗しました。');
+      setError(errorMessage(err, '作成に失敗しました。'));
     } finally {
       setBusy(false);
     }
