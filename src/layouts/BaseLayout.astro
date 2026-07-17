@@ -3,8 +3,17 @@ import '../styles/global.css';
 
 interface Props {
   title?: string;
+  description?: string;
 }
-const { title = '三国志NET' } = Astro.props;
+const {
+  title = '三国志NET',
+  description = '原典完全準拠、ブラウザで遊べる三国志ネットゲーム。内政・外交・合戦のすべてが、あの頃のまま蘇る。',
+} = Astro.props;
+
+// TwitterカードなどのOGPは絶対URLでないと画像が拾われないため、
+// astro.config.mjs の site/base を使って絶対URLを組み立てる。
+const ogImageUrl = new URL(`${import.meta.env.BASE_URL}ogp.png`, Astro.site).toString();
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
 ---
 <!doctype html>
 <html lang="ja">
@@ -15,6 +24,19 @@ const { title = '三国志NET' } = Astro.props;
     <meta name="theme-color" content="#1a120f" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f7f4ef" media="(prefers-color-scheme: light)" />
     <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <!-- OGP（Facebook/LINE等）＋ Twitterカード -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="三国志NET" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:url" content={pageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
     <!--
       テーマの適用は必ずレンダリング前・<head>内の同期スクリプトで行う。
       React読み込みを待つと一瞬だけ誤ったテーマが見えてしまう(FOUC)ため、
