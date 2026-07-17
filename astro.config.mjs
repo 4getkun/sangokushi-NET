@@ -7,8 +7,8 @@ import tailwindcss from '@tailwindcss/vite';
 // （例: ユーザーページ以外の場合は base: '/sangokushi-NET/' のようにリポジトリ名を入れる）。
 export default defineConfig({
   output: 'static',
-  site: 'https://forgetkun.github.io',
-  // base: '/sangokushi-NET/', // プロジェクトページとして配信する場合はコメントを外す
+  site: 'https://4getkun.github.io',
+  base: '/sangokushi-NET/', // プロジェクトページとして配信しているためコメントを外した
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],

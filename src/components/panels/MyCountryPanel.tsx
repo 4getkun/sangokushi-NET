@@ -48,7 +48,7 @@ export default function MyCountryPanel({
       <Card glass>
         <CardTitle>我が国</CardTitle>
         <p className="text-sm text-(--color-text-muted)">
-          あなたはまだどの国にも仕官していません。「軍議（コマンド）」タブから、
+          あなたはまだどの国にも仕官していません。「軍議」タブから、
           無所属の町にいる場合は建国、他国の町にいる場合は「仕官」コマンドで参加できます。
         </p>
       </Card>
@@ -314,14 +314,18 @@ function KingControls({
 function LocalRulesCard({ rules, onChanged }: { rules: LocalRulePostRow[]; onChanged: () => void }) {
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function post() {
     if (!body.trim()) return;
     setBusy(true);
+    setError(null);
     try {
       await postLocalRule(body);
       setBody('');
       onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '投稿に失敗しました。');
     } finally {
       setBusy(false);
     }
@@ -329,9 +333,12 @@ function LocalRulesCard({ rules, onChanged }: { rules: LocalRulePostRow[]; onCha
 
   async function remove(id: number) {
     setBusy(true);
+    setError(null);
     try {
       await deleteLocalRule(id);
       onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '削除に失敗しました。');
     } finally {
       setBusy(false);
     }
@@ -341,9 +348,10 @@ function LocalRulesCard({ rules, onChanged }: { rules: LocalRulePostRow[]; onCha
     <Card glass>
       <CardTitle>国内掲示板（お触れ）</CardTitle>
       <div className="mb-3 flex gap-2">
-        <input value={body} onChange={(e) => setBody(e.target.value)} className={inputCls} placeholder="お触れを投稿……" />
+        <input value={body} onChange={(e) => setBody(e.target.value)} className={`${inputCls} min-w-0 flex-1`} placeholder="お触れを投稿……" />
         <Button type="button" onClick={post} disabled={busy || !body.trim()}>投稿</Button>
       </div>
+      {error && <p className="mb-3 text-sm text-(--color-crimson-500)">{error}</p>}
       <ul className="flex max-h-64 flex-col gap-2 overflow-y-auto text-sm">
         {rules.length === 0 && <p className="text-(--color-text-faint)">まだ投稿がありません。</p>}
         {rules.map((r) => (
@@ -379,6 +387,7 @@ function UnitsCard({
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   // 所属部隊は unit_members で管理されるため厳密な判定はサーバー側に委ねるが、
   // 自分が部隊長になっている部隊があるかどうかはこのビューでも判定できる。
   const ownUnit = units.find((u) => u.leader_character_id === character.id) ?? null;
@@ -386,11 +395,14 @@ function UnitsCard({
   async function create() {
     if (!name.trim()) return;
     setBusy(true);
+    setError(null);
     try {
       await createUnit(name, message);
       setName('');
       setMessage('');
       onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '部隊の結成に失敗しました。');
     } finally {
       setBusy(false);
     }
@@ -398,9 +410,12 @@ function UnitsCard({
 
   async function join(unitId: number) {
     setBusy(true);
+    setError(null);
     try {
       await joinUnit(unitId);
       onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '参加に失敗しました。');
     } finally {
       setBusy(false);
     }
@@ -408,9 +423,12 @@ function UnitsCard({
 
   async function disband() {
     setBusy(true);
+    setError(null);
     try {
       await leaveOrDisbandUnit();
       onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '解散に失敗しました。');
     } finally {
       setBusy(false);
     }
@@ -419,6 +437,7 @@ function UnitsCard({
   return (
     <Card glass>
       <CardTitle>部隊</CardTitle>
+      {error && <p className="mb-3 text-sm text-(--color-crimson-500)">{error}</p>}
       <ul className="mb-3 flex flex-col gap-2 text-sm">
         {units.length === 0 && <p className="text-(--color-text-faint)">部隊はまだありません。</p>}
         {units.map((u) => (
@@ -457,12 +476,16 @@ function UnitsCard({
 function LoyaltyCard({ character, onChanged }: { character: CharacterRow; onChanged: () => void }) {
   const [value, setValue] = useState(character.loyalty);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function save() {
     setBusy(true);
+    setError(null);
     try {
       await setLoyalty(value);
       onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '申告に失敗しました。');
     } finally {
       setBusy(false);
     }
@@ -474,6 +497,7 @@ function LoyaltyCard({ character, onChanged }: { character: CharacterRow; onChan
       <p className="mb-2 text-xs text-(--color-text-faint)">
         ※原典の仕様上、忠誠度は自己申告制です（第三者による査定機構は存在しません）。
       </p>
+      {error && <p className="mb-2 text-sm text-(--color-crimson-500)">{error}</p>}
       <div className="flex items-center gap-3">
         <input
           type="range" min={0} max={100} value={value}

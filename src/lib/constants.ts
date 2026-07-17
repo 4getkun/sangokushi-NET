@@ -69,3 +69,17 @@ export const OFFICER_ROLES = [
 ] as const;
 
 export const RANK_TITLE_TIER_SIZE = 500; // $LANK
+
+// 原典 image/0.gif 〜 98.gif（ini_file/index.ini の $CHARA_IMAGE=98）相当。
+// 武将作成時のイメージ選択に使う、原典の肖像画像一式。
+export const PORTRAIT_COUNT = 99;
+
+// public/portraits/ 以下の画像は、GitHub Pagesのプロジェクトページ配信
+// （astro.config.mjs の base設定）によりルート直下ではなくサブパス配信になるため、
+// 単純な "/portraits/N.gif" 決め打ちだとbase未対応で404になる。
+// import.meta.env.BASE_URL は astro.config.mjs の base 設定値を反映した
+// 実行時の基点パス（末尾スラッシュ付き）なので、これを使って組み立てる。
+const BASE = import.meta.env.BASE_URL ?? '/';
+export function portraitUrl(n: number): string {
+  return `${BASE}${BASE.endsWith('/') ? '' : '/'}portraits/${n}.gif`;
+}

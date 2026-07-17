@@ -15,7 +15,7 @@ type Tab = 'status' | 'command' | 'map' | 'country' | 'ranking';
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'status', label: '本陣' },
-  { key: 'command', label: '軍議（コマンド）' },
+  { key: 'command', label: '軍議' },
   { key: 'map', label: '天下図' },
   { key: 'country', label: '我が国' },
   { key: 'ranking', label: '武勲録' },

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchTowns, fetchCountries, fetchMyQueue, fetchMyLogs } from '../../lib/game';
 import type { CharacterRow, TownRow, CountryRow, CommandQueueRow, CharacterLogRow } from '../../lib/database.types';
-import { COMMAND_LABELS, SOL_TYPE } from '../../lib/constants';
+import { COMMAND_LABELS, SOL_TYPE, portraitUrl } from '../../lib/constants';
 import { Card, CardTitle } from '../ui/Card';
 import { StatBar, Badge } from '../ui/StatBar';
 
@@ -45,18 +45,25 @@ export default function StatusPanel({
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <Card glass className="lg:col-span-2">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-(--color-text)">{character.display_name}</h2>
-              {country && <Badge tone="gold">{country.name}</Badge>}
-              {character.id === country?.king_character_id && <Badge tone="crimson">君主</Badge>}
+          <div className="flex items-start gap-3">
+            <img
+              src={portraitUrl(character.portrait)}
+              alt={`${character.display_name}の肖像`}
+              className="h-14 w-14 shrink-0 rounded-xl border border-(--color-border) bg-(--color-bg-elevated) [image-rendering:pixelated]"
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-(--color-text)">{character.display_name}</h2>
+                {country && <Badge tone="gold">{country.name}</Badge>}
+                {character.id === country?.king_character_id && <Badge tone="crimson">君主</Badge>}
+              </div>
+              <p className="mt-1 text-sm text-(--color-text-muted)">
+                ID: {character.login_name} ・ 拠点: {town ? town.name : '不明'}
+              </p>
+              {character.motto && (
+                <p className="mt-2 text-sm italic text-(--color-text-faint)">「{character.motto}」</p>
+              )}
             </div>
-            <p className="mt-1 text-sm text-(--color-text-muted)">
-              ID: {character.login_name} ・ 拠点: {town ? town.name : '不明'}
-            </p>
-            {character.motto && (
-              <p className="mt-2 text-sm italic text-(--color-text-faint)">「{character.motto}」</p>
-            )}
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold tabular-nums text-(--color-gold-600)">

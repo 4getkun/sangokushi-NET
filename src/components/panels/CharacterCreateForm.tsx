@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { createCharacter, fetchTowns, fetchCountries } from '../../lib/game';
 import type { TownRow, CountryRow } from '../../lib/database.types';
-import { ELEMENT_COLORS } from '../../lib/constants';
+import { ELEMENT_COLORS, PORTRAIT_COUNT, portraitUrl } from '../../lib/constants';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 
@@ -87,22 +87,38 @@ export default function CharacterCreateForm({ onCreated }: { onCreated: () => vo
           </Field>
         </div>
 
-        <Field label="肖像（お好みの番号をお選びください）">
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 8 }, (_, i) => i).map((i) => (
+        <Field label="肖像（お好みの武将画像をお選びください）">
+          <div className="flex items-center gap-3">
+            <img
+              src={portraitUrl(portrait)}
+              alt={`選択中の肖像 ${portrait}`}
+              className="h-16 w-16 shrink-0 rounded-xl border border-(--color-border) bg-(--color-bg-elevated) [image-rendering:pixelated]"
+            />
+            <p className="text-xs text-(--color-text-faint)">
+              下の一覧から選んでください（全{PORTRAIT_COUNT}種）。
+            </p>
+          </div>
+          <div className="mt-2 grid max-h-56 grid-cols-6 gap-1.5 overflow-y-auto rounded-xl border border-(--color-border) bg-(--color-bg-elevated) p-2 sm:grid-cols-9">
+            {Array.from({ length: PORTRAIT_COUNT }, (_, i) => i).map((i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setPortrait(i)}
                 className={[
-                  'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border font-mono text-sm transition-colors',
+                  'cursor-pointer rounded-lg border p-0.5 transition-colors',
                   portrait === i
-                    ? 'border-(--color-crimson-500) bg-(--color-crimson-500)/15 text-(--color-crimson-500)'
-                    : 'border-(--color-border) text-(--color-text-muted) hover:border-(--color-accent)/50',
+                    ? 'border-(--color-crimson-500) bg-(--color-crimson-500)/15'
+                    : 'border-transparent hover:border-(--color-accent)/50 hover:bg-(--color-surface-hover)',
                 ].join(' ')}
-                aria-label={`肖像${i}`}
+                aria-label={`肖像${i}を選択`}
+                title={`イメージ[${i}]`}
               >
-                {i}
+                <img
+                  src={portraitUrl(i)}
+                  alt={`肖像 ${i}`}
+                  loading="lazy"
+                  className="aspect-square w-full rounded [image-rendering:pixelated]"
+                />
               </button>
             ))}
           </div>
